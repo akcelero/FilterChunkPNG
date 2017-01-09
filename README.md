@@ -1,3 +1,3 @@
 # FilterChunkPNG
-Make new PNG from old file.<br />
-During creating ask user which chunk should be in new file.
+Make duplicate of PNG file.<br />
+During creating you can select which chunk should be in new file.
