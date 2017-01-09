@@ -1,0 +1,69 @@
+#!/bin/python
+import getopt, sys, binascii
+
+opts, args = getopt.getopt(sys.argv[1:], "i:o:hv", ["input", "output", "help"])
+
+inputFile = None
+outputFile = None
+help = False
+
+for o, a in opts:
+    if o in ("-i", "--input"):
+        inputFile = a
+    elif o in ("-o", "--output"):
+        outputFile = a
+    elif o in ("-h", "--help"):
+        help = True
+    elif o == "-v":
+        print("Version 1.0 by Akcelero")
+        quit()
+
+if inputFile == None or outputFile == None or help == True:
+    print("Program filters chunk in PNG files.")
+    print("Ask about adding every chunk section to output file")
+    print()
+    print("Usage: ",sys.argv[0]," [OPTIONS]")
+    print()
+    print("Options")
+    print(" -i --input [input file]")
+    print(" -o --output [output file]")
+    print(" -v --version")
+    print(" -h --help")
+    quit()
+
+header = b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a"
+inputData = []
+outputData = header
+
+with open(inputFile, 'rb') as f:
+    inputData = (f.read());
+
+if inputData[0:8] != header:
+    print("This is not PNG file!")
+    quit()
+
+
+i = 8
+while i < len(inputData):
+
+    length = int.from_bytes(inputData[i : i + 4], byteorder="big")
+    type = inputData[i + 4 : i + 8]
+    data = inputData[i+8:i+8+length]
+    crc = inputData[i + 8 + length: i + 12 + length]
+    crcCheck = binascii.crc32(inputData[i + 4 : i + 8 + length])
+
+    if crcCheck != int.from_bytes(crc, byteorder="big"):
+        print("CRC error")
+        quit()
+
+    print(length, " : ", type, " (CRC32 : ", crc, ")")
+    print(data[:30])
+    print("write this? [y/n]")
+
+    if input() in ("", "y"):
+        outputData += inputData[i : i + 12 + length]
+
+    i = i + 12 + length
+
+with open(outputFile, 'wb') as f:
+    f.write(bytearray(outputData))
