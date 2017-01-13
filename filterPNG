@@ -15,7 +15,7 @@ for o, a in opts:
     elif o in ("-h", "--help"):
         help = True
     elif o == "-v":
-        print("Version 1.0 by Akcelero") 
+        print("Version 1.0 by Akcelero")   
         quit()
 
 if inputFile == None or outputFile == None or help == True:
